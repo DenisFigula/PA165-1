@@ -109,6 +109,25 @@ public class ProductsControllerHateoas {
         return ResponseEntity.ok().eTag(eTag.toString()).body(productsResources);
     }
 
+    @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE,value = "/cached")
+    public final HttpEntity<Resources<Resource<ProductDTO>>> getProductsCached() {
+
+        logger.debug("rest getProducts({}) hateoas");
+
+        Collection<ProductDTO> productsDTO = productFacade.getAllProducts();
+        Collection<Resource<ProductDTO>> productResourceCollection = new ArrayList();
+
+        for (ProductDTO p : productsDTO) {
+            productResourceCollection.add(productResourceAssembler.toResource(p));
+        }
+
+        Resources<Resource<ProductDTO>> productsResources = new Resources<Resource<ProductDTO>>(productResourceCollection);
+        productsResources.add(linkTo(ProductsControllerHateoas.class).withSelfRel());
+
+        return new ResponseEntity<Resources<Resource<ProductDTO>>>(productsResources, HttpStatus.OK);
+
+    }
+
     /**
      *
      * Get one product according to id
